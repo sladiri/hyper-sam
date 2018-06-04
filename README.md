@@ -11,6 +11,7 @@ A framework for web apps powered by HyperHTML and the SAM pattern.
 2.  **Actions propose state updates**. Any action may be asynchronous and call external APIs (eg. validators).
 3.  The **Accept function** updates the state. **The logic here may either accept or reject** action proposals and enforces a consistent state. It may be asynchronous too, to persist its data to a database for example. The state is a plain object, there is not immutability required.
 4.  If required, actions may be called automatically if the state is in a particular shape.
+5.  Client side routing can be done via the [onpushstate package](https://github.com/WebReflection/onpushstate). If a **route** action is available, it is called with the _old path_ and the current _window.location_ object.
 
 ## Package Usage
 

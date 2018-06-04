@@ -102,6 +102,10 @@ export const clientPropose = ({
 };
 
 export const setupRouting = async ({ route }) => {
+    if (!route) {
+        // no route action present.
+        return;
+    }
     console.assert(window, "window");
     await import("onpushstate");
     window["onpushstate"] = async event => {
