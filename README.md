@@ -19,6 +19,15 @@ This package is published as a native ES Node module. If you have bundling probl
 
 ## API and example usage
 
+### App Interface
+
+This framework is intended to render an app with a specific interface:
+
+-   app: a render function, effectively a component at the root level (see component examples below)
+-   actions: An object containing **Action functions** which may be called from buttons, etc. They may be asynchronous functions and their return value is proposed to the **Accept function** of the model which may update the state. As a convention, the return value is an object with a *proposal* property (`action: (arg) => ({ proposal }) `).
+-   accept: `({ proposal }) => void` : This is the accept function of the model.
+-   nextAction: `({ state, actions }) => void` : This function may call actions according to some state. It is automatically called after each state update.
+
 ### Client Constructor
 
 -   A factory produces an app instance.
