@@ -22,7 +22,7 @@ This package is published as a native ES Node module. If you have bundling probl
 
 -   A factory produces an app instance.
 -   By default it will restore the server-side-rendered state.
--   While the page parses client-side code, a dispatcher records actions to be replayed when the client app is ready.
+-   While the page parses client-side code, a dispatch function may record actions to be replayed when the client app is ready.
 -   Will do an initial render.
 
 ```javascript
@@ -68,4 +68,116 @@ const { renderHTMLString, accept } = SsrApp({
 await accept({ route, query, title, description, posts });
 const appString = renderHTMLString();
 // insert into HTML body ...
+```
+
+### Connect Function
+
+The connect function passes some default props to a view:
+
+1.  state: the application state.
+2.  actions: an object of the app's actions.
+3.  render: used to render a view.
+4.  cn: a connect function to be used for child components.
+5.  dispatch: a function for click handlers to record actions while the client logic initialises (used with server-side rendering).
+6.  \_wire: a HyperHTML render function to force recreation of DOM nodes.
+
+Please also refer to the [HyperHTML docs](https://viperhtml.js.org/hyperhtml/documentation/#essentials-1).
+
+```javascript
+// one to three arguments
+cn(
+    component, // props => props.render`<!-- HTML -->`
+    childProps, // {} : Optional, will be merged into props
+    nameSpace, // number|string : Optional, used, if component is used multiple times in same view
+);
+// or four arguments
+cn(
+    component,
+    childProps,
+    reference, // {} : Object to weakly bind to, to free memory if not used anymore (see hyperhtml)
+    nameSpace,
+);
+```
+
+### Basic component example
+
+```javascript
+const viewConnected = props => {
+    const { actions, state, parentProp } = props;
+    const state = {
+        parentProp,
+        fetchData: actions.fetchData,
+        someState: state.someState,
+    };
+    return props.cn(_refreshButton, state);
+};
+
+const view = props => {
+    const { render, parentProp, fetchData, someState } = props;
+    return render`
+        <button onclick=${fetchData}>
+            State ${someState}-${parentProp}
+        </button>
+        `;
+};
+```
+
+### Render reference example
+
+A list component may use render references to free memory when list items are removed from state:
+
+```javascript
+const postsConnected = props => {
+    const state = {
+        posts: props.state.posts,
+        fetchPosts: props.actions.fetchPosts,
+    };
+    return props.cn(posts, state);
+};
+
+const posts = props => {
+    const { render, cn, posts, fetchPosts } = props;
+    return render`
+        <button onclick=${FetchPosts({ fetchPosts })}>Fetch Posts</button>
+        <ul class="posts">
+            ${posts.map(post => cn(postItem, { ...post }, post))}
+        </ul>
+        `;
+};
+
+const postItem = props => {
+    const { render, cn, title, summary, content } = props;
+    return render`
+        <li class="posts posts__post">
+            <p class="posts posts__title">${title}</p>
+            ${cn(postSummary, { summary })}
+            <p class="posts posts__content">${content}</p>
+        </li>
+        `;
+};
+
+const postSummary = props => {
+    const { render, summary } = props;
+    return render`
+        <p class="posts posts__summary">${summary}</p>
+        `;
+};
+```
+
+### Dispatch function example
+
+```javascript
+const view = props => {
+    const { render, dispatch, fetchPosts } = props;
+    const args = [1, 2];
+    const onClick = dispatch("fetchPosts", FetchPostsSSR, ...args);
+    return render`
+        <button onclick=${onClick}>Fetch Posts SSR</button>
+        `;
+};
+
+const FetchPostsSSR = (...args) => {
+    return function(event, action) {
+        action();
+    };
 ```
