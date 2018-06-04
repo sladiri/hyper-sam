@@ -1,7 +1,7 @@
 export const ssrDefaultProps = ({ state, dispatch, wire }) => {
     return Object.assign(Object.create(null), {
         actions: Object.assign(Object.create(null), { dispatch }),
-        _state: state,
+        state,
         _wire: wire,
         render: wire(),
     });
