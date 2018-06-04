@@ -20,7 +20,7 @@ export const setupSamHyperHtmlContainer = async ({
         if (!defaultProps) {
             actions.dispatch = Dispatch({ actions });
             defaultProps = Object.assign(Object.create(null), {
-                _actions: actions,
+                actions,
                 _state: state,
                 _wire: wire,
             });
