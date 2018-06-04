@@ -23,10 +23,56 @@ This package is published as a native ES Node module. If you have bundling probl
 
 This framework is intended to render an app with a specific interface:
 
--   app: a render function, effectively a component at the root level (see component examples below)
+-   app: Render function, effectively just a component at the root level (see component examples below).
 -   actions: An object containing **Action functions** which may be called from buttons, etc. They may be asynchronous functions and their return value is proposed to the **Accept function** of the model which may update the state. As a convention, the return value is an object with a *proposal* property (`action: (arg) => ({ proposal }) `).
--   accept: `({ proposal }) => void` : This is the accept function of the model.
--   nextAction: `({ state, actions }) => void` : This function may call actions according to some state. It is automatically called after each state update.
+-   accept: `({ proposal }) => void` : This is the **Accept function** of the model.
+-   nextAction: `({ state, actions }) => void` : This function may call **Action** according to some state. It is automatically called after each state update.
+
+An example app:
+
+```javascript
+export const Actions = ({ propose }) => {
+    return Object.assign(Object.create(null), {
+        async route({ oldPath, location }) {
+            if (oldPath === location.href) {
+                return;
+            }
+            const routeMatch = service.routeRegex.exec(location.pathname);
+            const route = routeMatch ? routeMatch[1] : "/";
+            const params = new URLSearchParams(location.search);
+            let query = [...params.keys()].reduce(
+                (keys, key) => keys.add(key),
+                new Set(),
+            );
+            query = [...query.values()].reduce(
+                (obj, key) => Object.assign(obj, { [key]: params.getAll(key) }),
+                Object.create(null),
+            );
+            await propose({ proposal: { route, query } });
+        },
+        async setName({ value }) {
+            if (typeof value !== "string") {
+                return;
+            }
+            await propose({ proposal: value });
+        },
+    });
+};
+
+const Accept = ({ state }) => {
+    return proposal => {
+        if (proposal.route !== undefined) {
+            state.route = proposal.route;
+        }
+    };
+};
+
+const nextAction = ({ state, actions }) => {
+    if (state.foo) {
+        actions.bar();
+    }
+};
+```
 
 ### Client Constructor
 
@@ -36,7 +82,7 @@ This framework is intended to render an app with a specific interface:
 -   Will do an initial render.
 
 ```javascript
-import { ClientApp } from "hyper-sam";
+import { ClientApp } from "hypersam";
 // app-shell is our app logic with a model, and actions.
 import { appShell, Actions, Accept, nextAction } from "./app-shell";
 
@@ -63,7 +109,7 @@ const { accept, actions } = ClientApp({
 -   The second is the app-model Accept function. The app state may be updated with this function in order to reuse the model's logic.
 
 ```javascript
-import { SsrApp } from "hyper-sam";
+import { SsrApp } from "hypersam";
 // app-shell is our app logic with a model, and actions.
 // actions are optional, automatic next-action not yet supported
 import { appShell, Accept } from "./app-shell";
