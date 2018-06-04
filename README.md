@@ -1,6 +1,9 @@
 # Hyper SAM
 
-A framework for web apps powered by [HyperHTML](https://viperhtml.js.org/) and the [SAM pattern](http://sam.js.org/).
+A framework for web apps powered by HyperHTML and the SAM pattern.
+
+-   [HyperHTML](https://viperhtml.js.org/)
+-   [SAM pattern](http://sam.js.org/)
 
 ## App Rendering
 
