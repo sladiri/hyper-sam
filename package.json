@@ -1,0 +1,34 @@
+{
+  "name": "hypersam",
+  "version": "0.0.1",
+  "main": "index",
+  "author": "Slađan Ristić",
+  "license": "ISC",
+  "keywords": [
+    "hyperhtml",
+    "viperhtml",
+    "sam-pattern",
+    "single-page-app",
+    "server-side-rendering"
+  ],
+  "repository": {
+    "url": "https://github.com/sladiri/hyper-sam"
+  },
+  "engines": {
+    "node": ">=8.1.11"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "hyperhtml": "^2.10.3",
+    "viperhtml": "^2.13.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.3",
+    "eslint": "^4.19.1",
+    "eslint-config-prettier": "^2.9.0",
+    "prettier": "^1.13.4",
+    "tslint": "^5.10.0"
+  }
+}
