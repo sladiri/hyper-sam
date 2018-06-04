@@ -17,8 +17,6 @@ export const ClientApp = async options => {
     const { accept, actions, render } = await setupSamHyperHtmlContainer(
         containerOptions,
     );
-    // return;
-    // await wait(2000);
     await render();
     // TODO: Do not allow actions until replay done?
     await replayIntermediateEvents({ actions });
