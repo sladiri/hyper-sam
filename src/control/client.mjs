@@ -1,4 +1,4 @@
-import hyper from "hyperhtml/esm";
+import hyper from "hyperhtml";
 import { Connect } from "./connect";
 
 export const setupSamHyperHtmlContainer = async ({
