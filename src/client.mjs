@@ -11,10 +11,12 @@ export const ClientApp = async options => {
     } else {
         window["dispatcher"] = { toReplay: [] };
     }
-    const { accept, actions, render } = await setupSamHyperHtmlContainer({
-        ...options,
+    const containerOptions = Object.assign(options, {
         state: state || restoreSsrState({ rootElement }),
     });
+    const { accept, actions, render } = await setupSamHyperHtmlContainer(
+        containerOptions,
+    );
     // return;
     // await wait(2000);
     await render();
