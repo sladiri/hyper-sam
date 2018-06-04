@@ -1,4 +1,4 @@
-import hyper from "hyperhtml";
+import { wire, bind } from "hyperhtml/esm";
 import { Connect } from "./connect";
 
 export const setupSamHyperHtmlContainer = async ({
@@ -23,10 +23,10 @@ export const setupSamHyperHtmlContainer = async ({
                 state,
                 actions,
                 dispatch: Dispatch({ actions }),
-                _wire: hyper.wire,
+                _wire: wire,
             });
             defaultProps._connect = Connect({
-                wire: hyper.wire,
+                wire,
                 defaultProps,
                 idComponentMap,
                 wiresMap,
@@ -38,7 +38,7 @@ export const setupSamHyperHtmlContainer = async ({
         props._namespace = [];
         const { title, rand } = state;
         const appString = defaultProps._connect()(app, { title, rand });
-        return hyper.bind(rootElement)`${appString}`;
+        return bind(rootElement)`${appString}`;
     };
     const accept = Accept({ state });
     const propose = Propose({
