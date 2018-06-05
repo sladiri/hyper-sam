@@ -136,15 +136,15 @@ Please also refer to the [HyperHTML docs](https://viperhtml.js.org/hyperhtml/doc
 ```javascript
 // one to three arguments
 cn(
-    component, // props => props.render`<!-- HTML -->`
-    childProps, // {} : Optional, will be merged into props
+    component, // function : props => props.render`<!-- HTML -->`
+    childProps, // object : Optional, will be merged into props
     nameSpace, // number|string : Optional, used, if component is used multiple times in same view
 );
 // or four arguments
 cn(
     component,
     childProps,
-    reference, // {} : Object to weakly bind to, to free memory if not used anymore (see hyperhtml)
+    reference, // object : Object to weakly bind DOM nodes to (see hyperhtml)
     nameSpace,
 );
 ```
@@ -153,13 +153,12 @@ cn(
 
 ```javascript
 const viewConnected = props => {
-    const { actions, state, parentProp } = props;
-    const state = {
-        parentProp,
-        fetchData: actions.fetchData,
-        someState: state.someState,
+    const childProps = {
+        parentProp: props.parentProp,
+        fetchData: props.actions.fetchData,
+        someState: props.state.someState,
     };
-    return props.cn(_refreshButton, state);
+    return props.cn(_refreshButton, childProps);
 };
 
 const view = props => {
