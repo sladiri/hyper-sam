@@ -122,7 +122,7 @@ const appString = renderHTMLString();
 
 ### Connect Function
 
-The connect function passes some default props to a view:
+The connect function (_cn_) passes some default props to a view:
 
 1.  state: the application state.
 2.  actions: an object of the app's actions.
@@ -134,18 +134,17 @@ The connect function passes some default props to a view:
 Please also refer to the [HyperHTML docs](https://viperhtml.js.org/hyperhtml/documentation/#essentials-1).
 
 ```javascript
-// one to three arguments
+// one or two arguments
 cn(
     component, // function : props => props.render`<!-- HTML -->`
-    childProps, // object : Optional, will be merged into props
-    nameSpace, // number|string : Optional, used, if component is used multiple times in same view
+    childProps, // object : Optional, will be merged into child's props
 );
-// or four arguments
+// four arguments
 cn(
     component,
     childProps,
-    reference, // object : Object to weakly bind DOM nodes to (see hyperhtml)
-    nameSpace,
+    reference, // object|null : Object to weakly bind DOM nodes to (see hyperhtml)
+    nameSpace, // number|string : Optional, used, if component is used multiple times in same view
 );
 ```
 
