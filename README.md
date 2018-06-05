@@ -177,11 +177,11 @@ A list component may use render references to free memory when list items are re
 
 ```javascript
 const postsConnected = props => {
-    const state = {
+    const childProps = {
         posts: props.state.posts,
         fetchPosts: props.actions.fetchPosts,
     };
-    return props.cn(posts, state);
+    return props.cn(posts, childProps);
 };
 
 const posts = props => {
