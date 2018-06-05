@@ -16,7 +16,9 @@ A framework for web apps powered by HyperHTML and the SAM pattern.
 
 Client side routing is supported via the [onpushstate package](https://github.com/WebReflection/onpushstate). A **route** action is called with the _old path_ string and the current _window.location_ object.
 
-_Note:_ A default **route** action is defined for convenience: `route: ({ oldPath, location, }) => ({ proposal: { route, query } })`.
+_Note:_ A default **route** action is defined for convenience:
+
+`route: ({ oldPath, location, }) => ({ proposal: { route, query } })`.
 
 ## Package Usage
 
@@ -42,7 +44,7 @@ export const Actions = ({ propose }) => {
             if (typeof value !== "string") {
                 return;
             }
-            await propose({ proposal: value });
+            await propose({ proposal: { value } });
         },
     };
 };
@@ -52,12 +54,16 @@ const Accept = ({ state }) => {
         if (proposal.route !== undefined) {
             state.route = proposal.route;
         }
+        if (proposal.value !== undefined) {
+            state.bar = proposal.value;
+        }
     };
 };
 
+// Optional
 const nextAction = ({ state, actions }) => {
     if (state.foo) {
-        actions.exampleAction();
+        actions.exampleAction({ value: "abc" });
     }
 };
 ```
