@@ -47,7 +47,7 @@ export const setupSamHyperHtmlContainer = async ({
         nextAction: () => nextAction({ state, actions }),
     });
     const actions = Object.assign(
-        null,
+        Object.create(null),
         { route: defaultRouteAction({ propose }) },
         Actions({ propose }),
     );
