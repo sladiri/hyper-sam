@@ -37,31 +37,14 @@ An example app:
 
 ```javascript
 export const Actions = ({ propose }) => {
-    return Object.assign(Object.create(null), {
-        async route({ oldPath, location }) {
-            if (oldPath === location.href) {
-                return;
-            }
-            const routeMatch = service.routeRegex.exec(location.pathname);
-            const route = routeMatch ? routeMatch[1] : "/";
-            const params = new URLSearchParams(location.search);
-            let query = [...params.keys()].reduce(
-                (keys, key) => keys.add(key),
-                new Set(),
-            );
-            query = [...query.values()].reduce(
-                (obj, key) => Object.assign(obj, { [key]: params.getAll(key) }),
-                Object.create(null),
-            );
-            await propose({ proposal: { route, query } });
-        },
-        async setName({ value }) {
+    return {
+        async exampleAction({ value }) {
             if (typeof value !== "string") {
                 return;
             }
             await propose({ proposal: value });
         },
-    });
+    };
 };
 
 const Accept = ({ state }) => {
@@ -74,7 +57,7 @@ const Accept = ({ state }) => {
 
 const nextAction = ({ state, actions }) => {
     if (state.foo) {
-        actions.bar();
+        actions.exampleAction();
     }
 };
 ```
