@@ -46,7 +46,11 @@ export const setupSamHyperHtmlContainer = async ({
         render: () => render({ state, actions }),
         nextAction: () => nextAction({ state, actions }),
     });
-    const actions = Actions({ propose });
+    const actions = Object.assign(
+        null,
+        { route: defaultRouteAction({ propose }) },
+        Actions({ propose }),
+    );
     await setupRouting({ route: actions.route });
     return { accept, actions, render: () => render({ state, actions }) };
 };
@@ -57,26 +61,16 @@ export const Dispatch = ({ actions }) => (name, handler, ...args) => {
     };
 };
 
-export const Propose = ({ accept, render, nextAction }) => {
-    const inProgress = new Map();
-    return clientPropose({
-        accept,
-        render,
-        nextAction,
-        inProgress,
-    });
-};
-
 // setImmediate is broken because of webpack-env + mjs https://github.com/webpack/webpack/issues/7032
 const setImmediate = func => {
     return setTimeout(func, 0);
 };
 
-export const clientPropose = ({
+export const Propose = ({
     accept,
     render,
-    nextAction,
-    inProgress,
+    nextAction = () => {},
+    inProgress = new Map(),
 }) => async ({ proposal }, cancelId) => {
     try {
         let actionFlag;
@@ -99,6 +93,25 @@ export const clientPropose = ({
         console.error("Propose error", error);
         throw error;
     }
+};
+
+export const routeRegex = /^\/app\/(.+)?$/;
+export const defaultRouteAction = ({ propose }) => ({ oldPath, location }) => {
+    if (oldPath === location.href) {
+        return;
+    }
+    const routeMatch = routeRegex.exec(location.pathname);
+    const route = routeMatch ? routeMatch[1] : "/";
+    const params = new URLSearchParams(location.search);
+    let query = [...params.keys()].reduce(
+        (keys, key) => keys.add(key),
+        new Set(),
+    );
+    query = [...query.values()].reduce(
+        (obj, key) => Object.assign(obj, { [key]: params.getAll(key) }),
+        Object.create(null),
+    );
+    return propose({ proposal: { route, query } });
 };
 
 export const setupRouting = async ({ route }) => {

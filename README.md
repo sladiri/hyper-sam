@@ -10,8 +10,13 @@ A framework for web apps powered by HyperHTML and the SAM pattern.
 1.  Every component may be a stateless function. A wrapping **connect function** (cn) may be used to inject state or actions into the props. It also allows for DOM nodes to be reused at render.
 2.  **Actions propose state updates**. Any action may be asynchronous and call external APIs (eg. validators).
 3.  The **Accept function** updates the state. **The logic here may either accept or reject** action proposals and enforces a consistent state. It may be asynchronous too, to persist its data to a database for example. The state is a plain object, there is not immutability required.
-4.  If required, actions may be called automatically if the state is in a particular shape.
-5.  Client side routing can be done via the [onpushstate package](https://github.com/WebReflection/onpushstate). If a **route** action is available, it is called with the _old path_ and the current _window.location_ object.
+4.  Actions may be called automatically if the state is in a particular shape via the optional **Next Action** function.
+
+### Routing
+
+Client side routing is supported via the [onpushstate package](https://github.com/WebReflection/onpushstate). A **route** action is called with the _old path_ string and the current _window.location_ object.
+
+_Note:_ A default **route** action is defined for convenience: `route: ({ oldPath, location, }) => ({ proposal: { route, query } })`.
 
 ## Package Usage
 
@@ -24,7 +29,7 @@ This package is published as a native ES Node module. If you have bundling probl
 This framework is intended to render an app with a specific interface:
 
 -   app: Render function, effectively just a component at the root level (see component examples below).
--   actions: An object containing **Action functions** which may be called from buttons, etc. They may be asynchronous functions and their return value is proposed to the **Accept function** of the model which may update the state. As a convention, the return value is an object with a *proposal* property (`action: (arg) => ({ proposal }) `).
+-   actions: An object containing **Action functions** which may be called from buttons, etc. They may be asynchronous functions and their return value is proposed to the **Accept function** of the model which may update the state. As a convention, the return value is an object with a _proposal_ property (`action: (arg) => ({ proposal })`).
 -   accept: `({ proposal }) => void` : This is the **Accept function** of the model.
 -   nextAction: `({ state, actions }) => void` : This function may call **Action** according to some state. It is automatically called after each state update.
 
@@ -87,12 +92,12 @@ import { ClientApp } from "hypersam";
 import { appShell, Actions, Accept, nextAction } from "./app-shell";
 
 const { accept, actions } = ClientApp({
-    state, // Initial state (eg. empty arrays instead of undefined, keep API consistent for render). Only needed without server-side render.
+    state, // Initial state (eg. empty arrays instead of undefined, keep API consistent for render). Only required without server-side render.
     app: appShell, // the root render function
     rootElement: document.body,
     Accept, // the update function for the state
     Actions, // an object of functions which propose state updates
-    nextAction, // automatic actions according to state
+    nextAction, // optional, automatic actions according to state
 })
     .then(({ accept, actions }) => {
         // May call accept or actions manually here.
