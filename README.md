@@ -139,7 +139,7 @@ cn(
     component, // function : props => props.render`<!-- HTML -->`
     childProps, // object : Optional, will be merged into child's props
 );
-// four arguments
+// three or four arguments
 cn(
     component,
     childProps,
@@ -151,17 +151,16 @@ cn(
 ### Basic component example
 
 ```javascript
-const viewConnected = props => {
+const fetchButtonConnected = props => {
     const childProps = {
         parentProp: props.parentProp,
         fetchData: props.actions.fetchData,
         someState: props.state.someState,
     };
-    return props.cn(_refreshButton, childProps);
+    return props.cn(fetchButton, childProps);
 };
 
-const view = props => {
-    const { render, parentProp, fetchData, someState } = props;
+const fetchButton = ({ render, parentProp, fetchData, someState }) => {
     return render`
         <button onclick=${fetchData}>
             State ${someState}-${parentProp}
