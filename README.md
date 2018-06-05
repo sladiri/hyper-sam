@@ -65,7 +65,7 @@ export const Actions = ({ propose }) => {
 };
 
 const Accept = ({ state }) => {
-    return proposal => {
+    return ({ proposal }) => {
         if (proposal.route !== undefined) {
             state.route = proposal.route;
         }

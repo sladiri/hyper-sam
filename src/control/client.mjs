@@ -86,7 +86,7 @@ export const Propose = ({
         if (cancelId && actionFlag !== inProgress.get(cancelId)) {
             return;
         }
-        await accept(data);
+        await accept({ proposal: data });
         render();
         setImmediate(nextAction);
     } catch (error) {
