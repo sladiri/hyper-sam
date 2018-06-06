@@ -3,7 +3,7 @@
 A framework for web apps powered by HyperHTML and the SAM pattern.
 
 -   [HyperHTML](https://viperhtml.js.org/)
--   [SAM pattern](http://sam.js.org/)
+-   [SAM pattern](https://sam.js.org/)
 
 ## App Rendering
 
@@ -14,7 +14,7 @@ A framework for web apps powered by HyperHTML and the SAM pattern.
 
 ### Routing
 
-Client side routing is supported via the [onpushstate package](https://github.com/WebReflection/onpushstate). A **route** action is called with the _old path_ string and the current _window.location_ object.
+Client side routing is supported via the [onpushstate package](https://www.npmjs.com/package/onpushstate). A **route** action is called with the _old path_ string and the current _window.location_ object.
 
 _Note:_ A default **route** action is defined for convenience:
 
@@ -35,10 +35,10 @@ This framework is intended to render an app with a specific interface:
 -   accept: `({ proposal }) => void` : This is the **Accept function** of the model.
 -   nextAction: `({ state, actions }) => void` : This function may call **Action** according to some state. It is automatically called after each state update.
 
-An example app:
+#### An example app
 
 ```javascript
-export const Actions = ({ propose }) => {
+const Actions = ({ propose }) => {
     return {
         async exampleAction({ value }) {
             if (typeof value !== "string") {
