@@ -81,12 +81,14 @@ import { ClientApp } from "hypersam";
 import { appShell, Actions, Accept, nextAction } from "./app-shell";
 
 const { accept, actions } = ClientApp({
-    state, // Initial state (eg. empty arrays instead of undefined, keep API consistent for render). Only required without server-side render.
     app: appShell, // the root render function
     rootElement: document.body,
     Accept, // the update function for the state
     Actions, // an object of functions which propose state updates
     nextAction, // optional, automatic actions according to state
+    state: {
+        /* Optional initial state object, ignored with server-side render */
+    },
 })
     .then(({ accept, actions }) => {
         // May call accept or actions manually here.
@@ -105,16 +107,15 @@ const { accept, actions } = ClientApp({
 ```javascript
 import { SsrApp } from "hypersam";
 // app-shell is our app logic with a model, and actions.
-// actions are optional, automatic next-action not yet supported
+// actions are optional, automatic next-action is not yet supported
 import { appShell, Accept } from "./app-shell";
 
-const state = { /* ... */ }; // Initial state (eg. empty arrays instead of undefined, keep API consistent for render).
 const { renderHTMLString, accept } = SsrApp({
-    state,
+    state: { /* Optional initial state object */ },
     app: appShell,
     Accept,
 });
-// ... may get data to propose to model here
+// May get data to propose to model here
 await accept({ route, query, title, description, posts });
 const appString = renderHTMLString();
 // insert into HTML body ...

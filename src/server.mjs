@@ -4,7 +4,7 @@ import { ssrDefaultProps, ssrDispatch } from "./control/server";
 
 const wire = viper.wire;
 
-export const SsrApp = ({ state, app, Accept }) => {
+export const SsrApp = ({ state = Object.create(null), app, Accept }) => {
     const defaultProps = ssrDefaultProps({
         state,
         dispatch: ssrDispatch,
