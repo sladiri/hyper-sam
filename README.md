@@ -135,18 +135,29 @@ The connect function (_cn_) passes some default props to a view:
 
 Please also refer to the [HyperHTML docs](https://viperhtml.js.org/hyperhtml/documentation/#essentials-1).
 
+It has multiple call signatures:
+
 ```javascript
-// one or two arguments
+// one argument
 cn(
     component, // function : props => props.render`<!-- HTML -->`
-    childProps, // object : Optional, will be merged into child's props
+);
+// two arguments
+cn(
+    component,
+    childProps, // object : Will be merged into child's props
+);
+// or
+cn(
+    component,
+    nameSpace, // number|string : Used, if component is used multiple times in same view
 );
 // three or four arguments
 cn(
     component,
     childProps,
     reference, // object|null : Object to weakly bind DOM nodes to (see hyperhtml)
-    nameSpace, // number|string : Optional, used, if component is used multiple times in same view
+    nameSpace, //optional
 );
 ```
 
