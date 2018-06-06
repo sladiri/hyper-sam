@@ -33,7 +33,8 @@ This framework is intended to render an app with a specific interface:
 -   app: Render function, effectively just a component at the root level (see component examples below).
 -   actions: An object containing **Action functions** which may be called from buttons, etc. They may be asynchronous functions and their return value is proposed to the **Accept function** of the model which may update the state. As a convention, the return value is an object with a _proposal_ property (`action: (arg) => ({ proposal })`).
 -   accept: `({ proposal }) => void` : This is the **Accept function** of the model.
--   nextAction: `({ state, actions }) => void` : This function may call **Action** according to some state. It is automatically called after each state update.
+-   nextAction: `({ state, actions }) => void` : This optional function may call **actions** according to some state. It is automatically called after each state update.
+-   state: `{}` Optionally, an initial state can be passed. This minimises checks inside the components, if you already have an empty Array instead of undefined for example.
 
 #### An example app
 
@@ -60,7 +61,7 @@ const Accept = ({ state }) => {
     };
 };
 
-// Optional
+// This is an optional function of the app
 const nextAction = ({ state, actions }) => {
     if (state.foo) {
         actions.exampleAction({ value: "abc" });
@@ -170,9 +171,26 @@ const fetchButton = ({ render, parentProp, fetchData, someState }) => {
 };
 ```
 
+### Namespacing example
+
+If you render the same component twice, you need to passs a namespace. HyperHTML is used to reuse as many DOM-nodes as possible, and without the namespace, only one instance of the component would be rendered. The namespace should be a unique Number or String for the containing component.
+
+```javascript
+const testSpan = props => props.render`<span>Test</span>`;
+
+const appliesNamespace = ({ render, cn }) => render`
+    <div>
+        ${cn(testSpan, 0)}
+        ${cn(testSpan, 1)}
+    </div>
+    `;
+```
+
 ### Render reference example
 
-A list component may use render references to free memory when list items are removed from state:
+A list component may use render references to free memory when list items are removed from state.
+
+**Note**: The _FetchPosts_ function manipulates the DOM and can pass event data to the actual action _fetchPosts_. This way, the action _fetchPosts_ itself can be used on the server too.
 
 ```javascript
 const postsConnected = props => {
@@ -191,6 +209,14 @@ const posts = props => {
             ${posts.map(post => cn(postItem, { ...post }, post))}
         </ul>
         `;
+};
+
+const FetchPosts = ({ fetchPosts }) => {
+    return async function(event) {
+        this.setAttribute("disabled", "true");
+        await fetchPosts(); // Wait until its data is accepted or rejected
+        this.removeAttribute("disabled");
+    };
 };
 
 const postItem = props => {
