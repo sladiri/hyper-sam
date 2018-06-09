@@ -5,12 +5,13 @@ A framework for web apps powered by HyperHTML and the SAM pattern.
 -   [HyperHTML](https://viperhtml.js.org/)
 -   [SAM pattern](https://sam.js.org/)
 
-## App Rendering
+## App Rendering via the SAM container
 
 1.  Every component may be a stateless function. A wrapping **connect function** (cn) may be used to inject state or actions into the props. It also allows for DOM nodes to be reused at render.
 2.  **Actions propose state updates**. Any action may be asynchronous and call external APIs (eg. validators).
-3.  The **Accept function** updates the state. **The logic here may either accept or reject** action proposals and enforces a consistent state. It may be asynchronous too, to persist its data to a database for example. The state is a plain object, there is not immutability required.
-4.  Actions may be called automatically if the state is in a particular shape via the optional **Next Action** function.
+3.  **An asynchronous action may be cancelled**, while it is resolving (eg. API call).
+4.  The **Accept function** updates the state. **The logic here may either accept or reject** action proposals and enforces a consistent state. It may be asynchronous too, to persist its data to a database for example. The state is a plain object, there is not immutability required.
+5.  Actions may be called automatically if the state is in a particular shape via the optional **Next Action** function.
 
 ### Routing
 
@@ -18,7 +19,7 @@ Client side routing is supported via the [onpushstate package](https://www.npmjs
 
 _Note:_ A default **route** action is defined for convenience:
 
-`route: ({ oldPath, location, }) => ({ proposal: { route, query } })`.
+`route: ({ oldPath, location, }) => propose({ proposal: { route, query } })`.
 
 ## Package Usage
 
@@ -74,7 +75,7 @@ const nextAction = ({ state, actions }) => {
 -   A factory produces an app instance.
 -   By default it will restore the server-side-rendered state.
 -   While the page parses client-side code, a dispatch function may record actions to be replayed when the client app is ready.
--   Will do an initial render.
+-   Will do an initial render automatically.
 
 ```javascript
 import { ClientApp } from "hypersam";
