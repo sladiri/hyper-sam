@@ -95,13 +95,12 @@ export const Propose = ({
     }
 };
 
-export const routeRegex = /^\/app\/(.+)?$/;
+export const routeRegex = /^\/(.+)?$/;
 export const defaultRouteAction = ({ propose }) => ({ oldPath, location }) => {
     if (oldPath === location.href) {
         return;
     }
-    const routeMatch = routeRegex.exec(location.pathname);
-    const route = routeMatch ? routeMatch[1] : "/";
+    const [, route = "home"] = routeRegex.exec(location.pathname) || [];
     const params = new URLSearchParams(location.search);
     let query = [...params.keys()].reduce(
         (keys, key) => keys.add(key),
