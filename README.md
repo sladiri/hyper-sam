@@ -21,8 +21,6 @@ _Note:_ A default **route** action is defined for convenience:
 
 `route: ({ oldPath, location, }) => propose({ proposal: { route, query } })`.
 
-_Note:_ A default **updateHeadScript** is defined for convenience too. It updates the page's title and description tags after a page-change.
-
 ## Package Usage
 
 This package is published as a native ES Node module. If you have bundling problems, please try importing the files _client_ or _server_ inside _src_ directly, instead of using _index.mjs_.
