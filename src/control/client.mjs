@@ -72,7 +72,7 @@ export const Propose = ({
     render,
     nextAction = () => {},
     inProgress = new Map(),
-}) => async ({ proposal }, cancelId) => {
+}) => async (proposal, cancelId) => {
     try {
         let actionFlag;
         if (cancelId) {
@@ -111,7 +111,7 @@ export const defaultRouteAction = ({ propose }) => ({ oldPath, location }) => {
         (obj, key) => Object.assign(obj, { [key]: params.getAll(key) }),
         Object.create(null),
     );
-    return propose({ proposal: { route, query } });
+    return propose({ route, query });
 };
 
 export const setupRouting = async ({ route }) => {

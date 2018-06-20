@@ -19,7 +19,7 @@ Client side routing is supported via the [onpushstate package](https://www.npmjs
 
 _Note:_ A default **route** action is defined for convenience:
 
-`route: ({ oldPath, location, }) => propose({ proposal: { route, query } })`.
+`route: ({ oldPath, location, }) => propose({ route, query })`.
 
 ## Package Usage
 
@@ -32,10 +32,10 @@ This package is published as a native ES Node module. If you have bundling probl
 This framework is intended to render an app with a specific interface:
 
 -   app: Render function, effectively just a component at the root level (see component examples below).
--   actions: An object containing **Action functions** which may be called from buttons, etc. They may be asynchronous functions and their return value is proposed to the **Accept function** of the model which may update the state. As a convention, the return value is an object with a _proposal_ property (`action: (arg) => ({ proposal })`).
--   accept: `({ proposal }) => void` : This is the **Accept function** of the model.
--   nextAction: `({ state, actions }) => void` : This optional function may call **actions** according to some state. It is automatically called after each state update.
--   state: `{}` Optionally, an initial state can be passed. This minimises checks inside the components, if you already have an empty Array instead of undefined for example.
+-   `action:: arg => proposal`: An object containing **Action functions** which may be called from buttons, etc. They may be asynchronous functions and their return value is proposed to the **Accept function** of the model which may update the state.
+-   `accept:: ({ proposal }) => void`: This is the **Accept function** of the model.
+-   `nextAction:: ({ state, actions }) => void` : This optional function may call **actions** according to some state. It is automatically called after each state update.
+-   `state {}`: Optionally, an initial state can be passed. This minimises checks inside the components, if you already have an empty Array instead of undefined for example.
 
 #### An example app
 
@@ -47,7 +47,7 @@ const Actions = ({ propose, service }) => {
                 return;
             }
             const x = await service.db.get(value);
-            await propose({ proposal: { value: x } });
+            await propose({ value: x });
         },
     };
 };
