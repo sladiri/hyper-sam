@@ -4,7 +4,12 @@ import { ssrDefaultProps, ssrDispatch } from "./control/server";
 
 const wire = viper.wire;
 
-export const SsrApp = ({ state = Object.create(null), app, Accept }) => {
+export const SsrApp = ({
+    state = Object.create(null),
+    app,
+    Accept,
+    service,
+}) => {
     const defaultProps = ssrDefaultProps({
         state,
         dispatch: ssrDispatch,
@@ -22,6 +27,6 @@ export const SsrApp = ({ state = Object.create(null), app, Accept }) => {
             ${defaultProps._connect()(app)}
             `;
     };
-    const accept = Accept({ state });
+    const accept = Accept({ state, service });
     return { renderHTMLString, accept };
 };

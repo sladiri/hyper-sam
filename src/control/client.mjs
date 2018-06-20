@@ -8,6 +8,7 @@ export const setupSamHyperHtmlContainer = async ({
     Accept,
     Actions,
     nextAction,
+    service,
 }) => {
     const idComponentMap = new WeakMap();
     const wiresMap = new Map();
@@ -40,7 +41,7 @@ export const setupSamHyperHtmlContainer = async ({
         const appString = defaultProps._connect()(app, { title, rand });
         return bind(rootElement)`${appString}`;
     };
-    const accept = Accept({ state });
+    const accept = Accept({ state, service });
     const propose = Propose({
         accept,
         render: () => render({ state, actions }),
@@ -49,7 +50,7 @@ export const setupSamHyperHtmlContainer = async ({
     const actions = Object.assign(
         Object.create(null),
         { route: defaultRouteAction({ propose }) },
-        Actions({ propose }),
+        Actions({ propose, service }),
     );
     await setupRouting({ route: actions.route });
     return { accept, actions, render: () => render({ state, actions }) };

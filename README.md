@@ -42,24 +42,26 @@ This framework is intended to render an app with a specific interface:
 #### An example app
 
 ```javascript
-const Actions = ({ propose }) => {
+const Actions = ({ propose, service }) => {
     return {
         async exampleAction({ value }) {
             if (typeof value !== "string") {
                 return;
             }
-            await propose({ proposal: { value } });
+            const x = await service.db.get(value);
+            await propose({ proposal: { value: x } });
         },
     };
 };
 
-const Accept = ({ state }) => {
+const Accept = ({ state, service }) => {
     return ({ proposal }) => {
         if (proposal.route !== undefined) {
             state.route = proposal.route;
         }
         if (proposal.value !== undefined) {
             state.bar = proposal.value;
+            service.db.put(state.bar);
         }
     };
 };
@@ -91,8 +93,9 @@ const { accept, actions } = ClientApp({
     Actions, // an object of functions which propose state updates
     nextAction, // optional, automatic actions according to state
     state: {
-        /* Optional initial state object, ignored with server-side render */
+        // Optional initial state object, ignored with server-side render
     },
+    service: { db: new DB() }, // Optional, available to both actions and model
 })
     .then(({ accept, actions }) => {
         // May call accept or actions manually here.
@@ -115,9 +118,10 @@ import { SsrApp } from "hypersam";
 import { appShell, Accept } from "./app-shell";
 
 const { renderHTMLString, accept } = SsrApp({
-    state: { /* Optional initial state object */ },
+    state: { /* Optional */ },
     app: appShell,
     Accept,
+    service: { /* Optional */ },
 });
 // May get data to propose to model here
 await accept({ route, query, title, description, posts });
