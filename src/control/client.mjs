@@ -34,9 +34,10 @@ export const setupSamHyperHtmlContainer = async ({
                 namespaceSet,
                 globalState: state,
             });
-            props = Object.assign(Object.create(null), defaultProps);
+            props = defaultProps;
         }
         props._namespace = [];
+        Object.seal(props);
         const { title, rand } = state;
         const appString = defaultProps._connect()(app, { title, rand });
         return bind(rootElement)`${appString}`;
@@ -47,10 +48,12 @@ export const setupSamHyperHtmlContainer = async ({
         render: () => render({ state, actions }),
         nextAction: () => nextAction({ state, actions }),
     });
-    const actions = Object.assign(
-        Object.create(null),
-        { route: defaultRouteAction({ propose }) },
-        Actions({ propose, service }),
+    const actions = Object.seal(
+        Object.assign(
+            Object.create(null),
+            { route: defaultRouteAction({ propose }) },
+            Actions({ propose, service }),
+        ),
     );
     await setupRouting({ route: actions.route });
     return { accept, actions, render: () => render({ state, actions }) };

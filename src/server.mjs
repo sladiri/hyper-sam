@@ -1,5 +1,4 @@
 import viper from "viperhtml";
-import { Connect } from "./control/connect";
 import { ssrDefaultProps, ssrDispatch } from "./control/server";
 
 const wire = viper.wire;
@@ -15,7 +14,6 @@ export const SsrApp = ({
         dispatch: ssrDispatch,
         wire,
     });
-    defaultProps._connect = Connect({ wire, defaultProps });
     const renderHTMLString = () => {
         return viper.wire()`
             <input

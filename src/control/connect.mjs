@@ -55,6 +55,7 @@ export const Connect = ({
                 childNamespace.push(`${namespace}`);
             }
         }
+        Object.seal(childProps);
         if (wireReference) {
             let refId;
             if (idComponentMap.has(wireReference)) {
@@ -83,10 +84,12 @@ export const Connect = ({
         wireReference = wireReference || globalState;
 
         const { _connect } = defaultProps;
-        const props = Object.assign(Object.create(defaultProps), childProps, {
-            render: wire(wireReference, wireNamespace),
-            cn: _connect(childNamespace),
-        });
+        const props = Object.seal(
+            Object.assign(Object.create(defaultProps), childProps, {
+                render: wire(wireReference, wireNamespace),
+                cn: _connect(childNamespace),
+            }),
+        );
         return component(props);
     };
 };

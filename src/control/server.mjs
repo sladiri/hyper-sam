@@ -1,11 +1,16 @@
+import { Connect } from "./connect";
+
 export const ssrDefaultProps = ({ state, dispatch, wire }) => {
-    return Object.assign(Object.create(null), {
+    const defaultProps = Object.assign(Object.create(null), {
         state,
         actions: Object.create(null),
         dispatch,
         render: wire(),
         _wire: wire,
     });
+    defaultProps._connect = Connect({ wire, defaultProps });
+    Object.seal(defaultProps);
+    return defaultProps;
 };
 
 export const ssrDispatch = (_name, _handler, ..._args) => `{
