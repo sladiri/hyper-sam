@@ -5,10 +5,9 @@ export const setupSamHyperHtmlContainer = async ({
     app,
     state,
     rootElement,
-    Accept,
-    Actions,
+    accept,
+    actions,
     nextAction,
-    service,
 }) => {
     const idComponentMap = new WeakMap();
     const wiresMap = new Map();
@@ -43,32 +42,34 @@ export const setupSamHyperHtmlContainer = async ({
         const appString = defaultProps._connect()(app, { title, rand });
         return bind(rootElement)`${appString}`;
     };
-    const accept = Accept({ state, service });
     const propose = Propose({
         state,
         accept,
-        render: () => render({ state, actions }),
-        nextAction: () => nextAction({ state, actions }),
+        render: () => render({ state, actions: actionsWrapped }),
+        nextAction: () => nextAction({ state, actions: actionsWrapped }),
     });
-    let actionsWithMetaData = Actions({ propose, service });
-    actionsWithMetaData = Object.entries(actionsWithMetaData).reduce(
-        (acc, [name, fn]) => {
+    const actionsWithMetaData = Object.entries(actions).reduce(
+        (acc, [name, Fn]) => {
+            const proposeWrapper = (proposal, cancelId) => {
+                return propose({ name, proposal, cancelId });
+            };
             return Object.assign(acc, {
-                [name]: (...args) => {
-                    const proposal = fn(...args);
-                    return { name, proposal };
-                },
+                [name]: Fn(proposeWrapper),
             });
         },
         Object.create(null),
     );
-    const actions = Object.assign(
+    const actionsWrapped = Object.assign(
         Object.create(null),
         { route: defaultRouteAction({ propose }) },
         actionsWithMetaData,
     );
-    await setupRouting({ route: actions.route });
-    return { accept, actions, render: () => render({ state, actions }) };
+    await setupRouting({ route: actionsWrapped.route });
+    return {
+        accept,
+        actions: actionsWrapped,
+        render: () => render({ state, actions: actionsWrapped }),
+    };
 };
 
 export const Dispatch = ({ actions }) => (name, handler, ...args) => {
@@ -88,13 +89,8 @@ export const Propose = ({
     render,
     nextAction = () => {},
     inProgress = new Map(),
-}) => async (actionData, cancelId) => {
+}) => async ({ name, proposal, cancelId }) => {
     try {
-        console.assert(
-            typeof actionData === "object" && actionData !== null,
-            "propose: typeof options === 'object' && options !== null",
-        );
-        const { name, proposal } = actionData;
         console.assert(
             typeof name === "string",
             "propose: typeof name === 'string'",
@@ -120,7 +116,7 @@ export const Propose = ({
         console.assert(!state._busy, "propose: !state._busy");
         state._busy = true;
         render();
-        await accept({ proposal: data });
+        await accept({ state, proposal: data });
         state._busy = false;
         render();
         setImmediate(nextAction);

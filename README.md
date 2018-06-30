@@ -32,36 +32,34 @@ This package is published as a native ES Node module. If you have bundling probl
 This framework is intended to render an app with a specific interface:
 
 -   app: Render function, effectively just a component at the root level (see component examples below).
--   `action:: arg => proposal`: An object containing **Action functions** which may be called from buttons, etc. They may be asynchronous functions and their return value is proposed to the **Accept function** of the model which may update the state.
--   `accept:: ({ proposal }) => void`: This is the **Accept function** of the model.
+-   `actions {}`: An object containing **Action functions** which may be called from buttons, etc.
+    -   `action:: propose => arg => proposal`: An optionally asynchronous function. Its return value is proposed to the **Accept function** of the model which may update the state.
+-   `accept:: ({ state, proposal }) => void`: This is the **Accept function** of the model.
 -   `nextAction:: ({ state, actions }) => void` : This optional function may call **actions** according to some state. It is automatically called after each state update.
 -   `state {}`: Optionally, an initial state can be passed. This minimises checks inside the components, if you already have an empty Array instead of undefined for example.
 
 #### An example app
 
 ```javascript
-const Actions = ({ propose, service }) => {
+const Actions = ({ someService }) => {
     return {
-        async exampleAction({ value }) {
+        exampleAction: propose => async ({ value }) => {
             if (typeof value !== "string") {
                 return;
             }
-            const x = await service.db.get(value);
+            const x = await someService.db.get(value);
             await propose({ value: x });
         },
     };
 };
 
-const Accept = ({ state, service }) => {
-    return ({ proposal }) => {
-        if (proposal.route !== undefined) {
-            state.route = proposal.route;
-        }
-        if (proposal.value !== undefined) {
-            state.bar = proposal.value;
-            service.db.put(state.bar);
-        }
-    };
+const Accept = ({ state, proposal }) => {
+    if (proposal.route !== undefined) {
+        state.route = proposal.route;
+    }
+    if (proposal.value !== undefined) {
+        state.bar = proposal.value;
+    }
 };
 
 // This is an optional function of the app
@@ -82,18 +80,17 @@ const nextAction = ({ state, actions }) => {
 ```javascript
 import { ClientApp } from "hypersam";
 // app-shell is our app logic with a model, and actions.
-import { appShell, Actions, Accept, nextAction } from "./app-shell";
+import { appShell, actions, accept, nextAction } from "./app-shell";
 
 const { accept, actions } = ClientApp({
     app: appShell, // the root render function
     rootElement: document.body,
-    Accept, // the update function for the state
-    Actions, // an object of functions which propose state updates
+    accept, // the update function for the state
+    actions, // an object of functions which propose state updates
     nextAction, // optional, automatic actions according to state
     state: {
         // Optional initial state object, ignored with server-side render
     },
-    service: { db: new DB() }, // Optional, available to both actions and model
 })
     .then(({ accept, actions }) => {
         // May call accept or actions manually here.
@@ -113,16 +110,16 @@ const { accept, actions } = ClientApp({
 import { SsrApp } from "hypersam";
 // app-shell is our app logic with a model, and actions.
 // actions are optional, automatic next-action is not yet supported
-import { appShell, Accept } from "./app-shell";
+import { appShell, accept } from "./app-shell";
 
-const { renderHTMLString, accept } = SsrApp({
+const { renderHTMLString, accept: ssrAccept } = SsrApp({
     state: { /* Optional */ },
     app: appShell,
-    Accept,
-    service: { /* Optional */ },
+    accept,
 });
 // May get data to propose to model here
-await accept({ route, query, title, description, posts });
+const proposal = { route, query, title, description, posts };
+await ssrAccept({ state, proposal });
 const appString = renderHTMLString();
 // insert into HTML body ...
 ```

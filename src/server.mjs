@@ -3,12 +3,7 @@ import { ssrDefaultProps, ssrDispatch } from "./control/server";
 
 const wire = viper.wire;
 
-export const SsrApp = ({
-    state = Object.create(null),
-    app,
-    Accept,
-    service,
-}) => {
+export const SsrApp = ({ state = Object.create(null), app, accept }) => {
     console.assert(
         typeof state === "object" && state !== null,
         "SsrApp: typeof state === 'object' && state !== null",
@@ -18,8 +13,8 @@ export const SsrApp = ({
         "SsrApp: typeof app === 'function'",
     );
     console.assert(
-        typeof Accept === "function",
-        "SsrApp: typeof Accept === 'function'",
+        typeof accept === "function",
+        "SsrApp: typeof accept === 'function'",
     );
     const defaultProps = ssrDefaultProps({
         state,
@@ -37,6 +32,5 @@ export const SsrApp = ({
             ${defaultProps._connect()(app)}
             `;
     };
-    const accept = Accept({ state, service });
     return { renderHTMLString, accept };
 };
