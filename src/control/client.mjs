@@ -20,6 +20,7 @@ export const setupSamHyperHtmlContainer = async ({
         namespaceSet.clear();
         if (!defaultProps) {
             actions.dispatch = Dispatch({ actions });
+            Object.seal(actions);
             defaultProps = Object.assign(Object.create(null), {
                 state,
                 actions,
@@ -49,12 +50,22 @@ export const setupSamHyperHtmlContainer = async ({
         render: () => render({ state, actions }),
         nextAction: () => nextAction({ state, actions }),
     });
-    const actions = Object.seal(
-        Object.assign(
-            Object.create(null),
-            { route: defaultRouteAction({ propose }) },
-            Actions({ propose, service }),
-        ),
+    let actionsWithMetaData = Actions({ propose, service });
+    actionsWithMetaData = Object.entries(actionsWithMetaData).reduce(
+        (acc, [name, fn]) => {
+            return Object.assign(acc, {
+                [name]: (...args) => {
+                    const proposal = fn(...args);
+                    return { name, proposal };
+                },
+            });
+        },
+        Object.create(null),
+    );
+    const actions = Object.assign(
+        Object.create(null),
+        { route: defaultRouteAction({ propose }) },
+        actionsWithMetaData,
     );
     await setupRouting({ route: actions.route });
     return { accept, actions, render: () => render({ state, actions }) };
@@ -77,11 +88,21 @@ export const Propose = ({
     render,
     nextAction = () => {},
     inProgress = new Map(),
-}) => async (proposal, cancelId) => {
+}) => async (actionData, cancelId) => {
     try {
+        console.assert(
+            typeof actionData === "object" && actionData !== null,
+            "propose: typeof options === 'object' && options !== null",
+        );
+        const { name, proposal } = actionData;
+        console.assert(
+            typeof name === "string",
+            "propose: typeof name === 'string'",
+        );
+        console.assert(!!proposal, "propose: !!proposal");
         if (state._busy) {
             console.warn(
-                "Ignored action because model is still processing previous action.",
+                `Ignored action because model is still processing previous action [${name}]`,
             );
             return;
         }
@@ -126,7 +147,7 @@ export const defaultRouteAction = ({ propose }) => ({ oldPath, location }) => {
         (obj, key) => Object.assign(obj, { [key]: params.getAll(key) }),
         Object.create(null),
     );
-    return propose({ route, query });
+    return propose({ name: "route", proposal: { route, query } });
 };
 
 export const setupRouting = async ({ route }) => {
