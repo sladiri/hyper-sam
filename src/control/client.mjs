@@ -106,17 +106,15 @@ export const Propose = ({
             );
             return;
         }
-        let actionFlag;
-        if (cancelId) {
-            const inProgressValue = !(inProgress.get(cancelId) || false);
-            inProgress.set(cancelId, inProgressValue);
-            actionFlag = inProgressValue;
+        if (cancelId && !inProgress.get(cancelId)) {
+            inProgress.set(cancelId, true);
         }
         const data = await proposal;
         if (!data) {
             return;
         }
-        if (cancelId && actionFlag !== inProgress.get(cancelId)) {
+        if (cancelId && inProgress.get(cancelId)) {
+            inProgress.set(cancelId, false);
             return;
         }
         console.assert(!state._busy, "propose: !state._busy");
