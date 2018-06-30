@@ -50,8 +50,8 @@ export const setupSamHyperHtmlContainer = async ({
     });
     const actionsWithMetaData = Object.entries(actions).reduce(
         (acc, [name, Fn]) => {
-            const proposeWrapper = (proposal, cancelId) => {
-                return propose({ name, proposal, cancelId });
+            const proposeWrapper = (proposal, cancellable) => {
+                return propose({ name, proposal, cancellable });
             };
             return Object.assign(acc, {
                 [name]: Fn(proposeWrapper),
@@ -89,7 +89,7 @@ export const Propose = ({
     render,
     nextAction = () => {},
     inProgress = new Map(),
-}) => async ({ name, proposal, cancelId }) => {
+}) => async ({ name, proposal, cancellable }) => {
     try {
         console.assert(
             typeof name === "string",
@@ -102,15 +102,39 @@ export const Propose = ({
             );
             return;
         }
-        if (cancelId && !inProgress.get(cancelId)) {
-            inProgress.set(cancelId, true);
+        const cancelId = Math.random();
+        if (cancellable) {
+            const { pendingId, cancelled } = inProgress.get(name) || {};
+            if (!pendingId) {
+                inProgress.set(name, { pendingId: cancelId, cancelled: false });
+            }
+            if (pendingId && pendingId !== cancelId) {
+                inProgress.set(name, {
+                    pendingId,
+                    cancelled: true,
+                });
+                return;
+            }
         }
         const data = await proposal;
-        if (!data) {
-            return;
+        if (cancellable) {
+            console.assert(
+                typeof inProgress.get(name) === "object" &&
+                    inProgress.get(name) !== null,
+                "ClientApp: typeof inProgress.get(name) === 'object' && inProgress.get(name) !== null",
+            );
+            const { pendingId, cancelled } = inProgress.get(name);
+            console.assert(
+                pendingId === cancelId,
+                "propose: pendingId === cancelId",
+            );
+            if (cancelled) {
+                inProgress.set(name, { pendingId: null });
+                return;
+            }
         }
-        if (cancelId && inProgress.get(cancelId)) {
-            inProgress.set(cancelId, false);
+        inProgress.set(name, { pendingId: null });
+        if (!data) {
             return;
         }
         console.assert(!state._busy, "propose: !state._busy");

@@ -4,6 +4,7 @@ A framework for web apps powered by HyperHTML and the SAM pattern.
 
 -   [HyperHTML](https://viperhtml.js.org/)
 -   [SAM pattern](https://sam.js.org/)
+-   [Example](https://github.com/sladiri/hyper-sam-example)
 
 ## App Rendering via the SAM container
 
@@ -33,7 +34,7 @@ This framework is intended to render an app with a specific interface:
 
 -   app: Render function, effectively just a component at the root level (see component examples below).
 -   `actions {}`: An object containing **Action functions** which may be called from buttons, etc.
-    -   `action:: propose => arg => proposal`: An optionally asynchronous function. Its return value is proposed to the **Accept function** of the model which may update the state.
+    -   `action:: propose => arg => (proposal, cancellable?)`: An optionally asynchronous function. Its return value is proposed to the **Accept function** of the model which may update the state. **If cancellable is set, the action can be aborted** (eg. while calling an API). To abort a pending proposal, the action has to be called again (the proposal will be ignored).
 -   `accept:: ({ state, proposal }) => void`: This is the **Accept function** of the model.
 -   `nextAction:: ({ state, actions }) => void` : This optional function may call **actions** according to some state. It is automatically called after each state update.
 -   `state {}`: Optionally, an initial state can be passed. This minimises checks inside the components, if you already have an empty Array instead of undefined for example.
