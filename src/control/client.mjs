@@ -44,6 +44,7 @@ export const setupSamHyperHtmlContainer = async ({
     };
     const accept = Accept({ state, service });
     const propose = Propose({
+        state,
         accept,
         render: () => render({ state, actions }),
         nextAction: () => nextAction({ state, actions }),
@@ -71,12 +72,19 @@ const setImmediate = func => {
 };
 
 export const Propose = ({
+    state,
     accept,
     render,
     nextAction = () => {},
     inProgress = new Map(),
 }) => async (proposal, cancelId) => {
     try {
+        if (state._busy) {
+            console.warn(
+                "Ignored action because model is still processing previous action.",
+            );
+            return;
+        }
         let actionFlag;
         if (cancelId) {
             const inProgressValue = !(inProgress.get(cancelId) || false);
@@ -90,7 +98,11 @@ export const Propose = ({
         if (cancelId && actionFlag !== inProgress.get(cancelId)) {
             return;
         }
+        console.assert(!state._busy, "propose: !state._busy");
+        state._busy = true;
+        render();
         await accept({ proposal: data });
+        state._busy = false;
         render();
         setImmediate(nextAction);
     } catch (error) {
