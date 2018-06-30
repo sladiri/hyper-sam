@@ -9,6 +9,18 @@ export const SsrApp = ({
     Accept,
     service,
 }) => {
+    console.assert(
+        typeof state === "object" && state !== null,
+        "SsrApp: typeof state === 'object' && state !== null",
+    );
+    console.assert(
+        typeof app === "function",
+        "SsrApp: typeof app === 'function'",
+    );
+    console.assert(
+        typeof Accept === "function",
+        "SsrApp: typeof Accept === 'function'",
+    );
     const defaultProps = ssrDefaultProps({
         state,
         dispatch: ssrDispatch,
