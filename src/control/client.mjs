@@ -96,11 +96,11 @@ export const Propose = ({
             "propose: typeof name === 'string'",
         );
         console.assert(!!proposal, "propose: !!proposal");
-        if (state._busy) {
+        if (state.busy) {
             console.warn(
                 `Ignored action because model is still processing previous action [${name}]`,
             );
-            return;
+            return false;
         }
         const cancelId = Math.random();
         if (cancellable) {
@@ -137,11 +137,11 @@ export const Propose = ({
         if (!data) {
             return;
         }
-        console.assert(!state._busy, "propose: !state._busy");
+        console.assert(!state.busy, "propose: !state.busy");
         state._busy = true;
         render();
         await accept({ state, proposal: data });
-        state._busy = false;
+        state.busy = false;
         render();
         setImmediate(nextAction);
     } catch (error) {
