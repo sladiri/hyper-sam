@@ -89,65 +89,94 @@ export const Propose = ({
     render,
     nextAction = () => {},
     inProgress = new Map(),
-}) => async ({ name, proposal, cancellable }) => {
-    try {
-        console.assert(
-            typeof name === "string",
-            "propose: typeof name === 'string'",
-        );
-        console.assert(!!proposal, "propose: !!proposal");
-        if (state.busy) {
-            console.warn(
-                `Ignored action because model is still processing previous action [${name}]`,
+    retryTimeout = 250,
+    maxRetries = 5,
+}) => {
+    const propose = async ({ name, proposal, cancellable, retry = 0 }) => {
+        try {
+            console.assert(
+                typeof name === "string",
+                "propose: typeof name === 'string'",
             );
-            return false;
-        }
-        const cancelId = Math.random();
-        if (cancellable) {
-            const { pendingId, cancelled } = inProgress.get(name) || {};
-            if (!pendingId) {
-                inProgress.set(name, { pendingId: cancelId, cancelled: false });
-            }
-            if (pendingId && pendingId !== cancelId) {
-                inProgress.set(name, {
-                    pendingId,
-                    cancelled: true,
+            console.assert(!!proposal, "propose: !!proposal");
+            if (state.busy) {
+                if (retry >= maxRetries) {
+                    console.warn(
+                        `Aborting action [${name}] while model is busy, retried [${retry}] times`,
+                    );
+                    return false;
+                }
+                console.warn(
+                    `Retrying action in [${retryTimeout}ms], model is still processing previous action [${name}]`,
+                );
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        try {
+                            resolve(
+                                propose({
+                                    name,
+                                    proposal,
+                                    cancellable,
+                                    retry: retry + 1,
+                                }),
+                            );
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }, retryTimeout);
                 });
+            }
+            const cancelId = Math.random();
+            if (cancellable) {
+                const { pendingId, cancelled } = inProgress.get(name) || {};
+                if (!pendingId) {
+                    inProgress.set(name, {
+                        pendingId: cancelId,
+                        cancelled: false,
+                    });
+                }
+                if (pendingId && pendingId !== cancelId) {
+                    inProgress.set(name, {
+                        pendingId,
+                        cancelled: true,
+                    });
+                    return;
+                }
+            }
+            const data = await proposal;
+            if (cancellable) {
+                console.assert(
+                    typeof inProgress.get(name) === "object" &&
+                        inProgress.get(name) !== null,
+                    "ClientApp: typeof inProgress.get(name) === 'object' && inProgress.get(name) !== null",
+                );
+                const { pendingId, cancelled } = inProgress.get(name);
+                console.assert(
+                    pendingId === cancelId,
+                    "propose: pendingId === cancelId",
+                );
+                if (cancelled) {
+                    inProgress.set(name, { pendingId: null });
+                    return;
+                }
+            }
+            inProgress.set(name, { pendingId: null });
+            if (!data) {
                 return;
             }
+            console.assert(!state.busy, "propose: !state.busy");
+            state._busy = true;
+            render();
+            await accept({ state, proposal: data });
+            state.busy = false;
+            render();
+            setImmediate(nextAction);
+        } catch (error) {
+            console.error("Propose error", error);
+            throw error;
         }
-        const data = await proposal;
-        if (cancellable) {
-            console.assert(
-                typeof inProgress.get(name) === "object" &&
-                    inProgress.get(name) !== null,
-                "ClientApp: typeof inProgress.get(name) === 'object' && inProgress.get(name) !== null",
-            );
-            const { pendingId, cancelled } = inProgress.get(name);
-            console.assert(
-                pendingId === cancelId,
-                "propose: pendingId === cancelId",
-            );
-            if (cancelled) {
-                inProgress.set(name, { pendingId: null });
-                return;
-            }
-        }
-        inProgress.set(name, { pendingId: null });
-        if (!data) {
-            return;
-        }
-        console.assert(!state.busy, "propose: !state.busy");
-        state._busy = true;
-        render();
-        await accept({ state, proposal: data });
-        state.busy = false;
-        render();
-        setImmediate(nextAction);
-    } catch (error) {
-        console.error("Propose error", error);
-        throw error;
-    }
+    };
+    return propose;
 };
 
 export const routeRegex = /^\/(.+)?$/;

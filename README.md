@@ -11,7 +11,7 @@ A framework for web apps powered by HyperHTML and the SAM pattern.
 1.  Every component may be a stateless function. A wrapping **connect function** (cn) may be used to inject state or actions into the props. It also allows for DOM nodes to be reused at render.
 2.  **Actions propose state updates**. Any action may be asynchronous and call external APIs (eg. validators).
 3.  **An asynchronous action may be cancelled**, while it is resolving (eg. API call).
-4.  The **Accept function** updates the state. **The logic here may either accept or reject** action proposals and enforces a consistent state. It may be asynchronous too, to persist its data to a database for example. **No further actions are processed** before the model completes a proposal. A **\busy** flag is automatically set by the container in the state to disable UI inputs for example while the proposal is processed. The state is a plain object, there is not immutability required.
+4.  The **Accept function** updates the state. **The logic here may either accept or reject** action proposals and enforces a consistent state. It may be asynchronous too, to persist its data to a database for example. **No further actions are processed** before the model completes a proposal, and intermediate actions are retried after a timeout automatically. A **\busy** flag is automatically set by the container in the state to disable UI inputs for example while the proposal is processed. The state is a plain object, there is not immutability required.
 5.  Actions may be called automatically if the state is in a particular shape via the optional **Next Action** function.
 
 ### Routing
